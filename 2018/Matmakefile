@@ -1,0 +1,21 @@
+# Matmake file
+# https://github.com/mls-m5/matmake
+
+# ======== global flags  ========
+
+includes += include
+config   += c++14 debug Wall
+flags    += -Wno-unused-parameter -Wno-sign-compare
+dir       = build
+
+# ========= Targets =============
+
+1.src  = src/1.cpp
+1.copy = 1.txt
+
+2.src  = src/2.cpp
+2.copy = 2.txt
+
+3.src  = src/3.cpp
+3.copy = 3.txt
+
