@@ -4,7 +4,7 @@
 # ======== global flags  ========
 
 includes += include
-config   += c++14 debug Wall
+config   += c++17 debug Wall
 flags    += -Wno-unused-parameter -Wno-sign-compare
 dir       = build
 
@@ -18,4 +18,7 @@ dir       = build
 
 3.src  = src/3.cpp
 3.copy = 3.txt
+
+4.src  = src/4.cpp
+4.copy = 4.txt
 
