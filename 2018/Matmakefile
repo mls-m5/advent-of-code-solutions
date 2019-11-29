@@ -10,29 +10,34 @@ dir       = build
 libs     += -pthread
 flags    += #-O3
 copy     += %.txt
+src       = src/%.cpp
 
 # ========= Targets =============
 
-1.src = src/%.cpp
+1.out = %
 
-2.src = src/%.cpp
+2.out = %
 
-3.src = src/%.cpp
+3.out = %
 
-copy  += %ex.txt # started using extra text files after this
+# started using extra text files after this
+copy  += %ex.txt
 
-4.src = src/%.cpp
+4.out = %
 
-5.src = src/%.cpp
+5.out = %
 
-6.src = src/%.cpp
+6.out = %
 
-7.src = src/%.cpp
+7.out = %
 
-8.src = src/%.cpp
+8.out = %
 
-9.src = src/%.cpp
+9.out = %
 9.copy = # no input needed
 
-10.src = src/%.cpp
+10.out = %
 
+11.out = %
+11.copy = #
+11.flags += -O3
