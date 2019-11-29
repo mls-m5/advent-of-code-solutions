@@ -32,3 +32,6 @@ flags    += #-O3
 
 7.src = src/%.cpp
 7.copy = %.txt %ex.txt
+
+8.src = src/%.cpp
+8.copy = %.txt %ex.txt
