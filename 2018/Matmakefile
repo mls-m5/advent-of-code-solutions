@@ -4,9 +4,11 @@
 # ======== global flags  ========
 
 includes += include
-config   += c++17 debug Wall
+config   += c++17 Wall debug
 flags    += -Wno-unused-parameter -Wno-sign-compare
 dir       = build
+libs     += -pthread
+flags    += #-O3
 
 # ========= Targets =============
 
@@ -21,4 +23,7 @@ dir       = build
 
 4.src  = src/4.cpp
 4.copy = 4.txt
+
+5.src  = src/5.cpp
+5.copy = 5.txt
 
