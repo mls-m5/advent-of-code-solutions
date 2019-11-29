@@ -22,8 +22,10 @@ flags    += #-O3
 3.copy = 3.txt
 
 4.src  = src/4.cpp
-4.copy = 4.txt
+4.copy = 4.txt 4ex.txt
 
 5.src  = src/5.cpp
-5.copy = 5.txt
+5.copy = 5.txt 5ex.txt
 
+6.src = src/6.cpp
+6.copy = 6.txt 6ex.txt
