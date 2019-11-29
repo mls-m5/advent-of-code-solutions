@@ -12,20 +12,23 @@ flags    += #-O3
 
 # ========= Targets =============
 
-1.src  = src/1.cpp
-1.copy = 1.txt
+1.src  = src/%.cpp
+1.copy = %.txt
 
-2.src  = src/2.cpp
-2.copy = 2.txt
+2.src  = src/%.cpp
+2.copy = %.txt
 
-3.src  = src/3.cpp
-3.copy = 3.txt
+3.src  = src/%.cpp
+3.copy = %.txt
 
-4.src  = src/4.cpp
-4.copy = 4.txt 4ex.txt
+4.src  = src/%.cpp
+4.copy = %.txt %ex.txt
 
-5.src  = src/5.cpp
-5.copy = 5.txt 5ex.txt
+5.src  = src/%.cpp
+5.copy = %.txt %ex.txt
 
-6.src = src/6.cpp
-6.copy = 6.txt 6ex.txt
+6.src = src/%.cpp
+6.copy = %.txt %ex.txt
+
+7.src = src/%.cpp
+7.copy = %.txt %ex.txt
