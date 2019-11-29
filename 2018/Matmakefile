@@ -33,3 +33,6 @@ copy  += %ex.txt # started using extra text files after this
 
 9.src = src/%.cpp
 9.copy = # no input needed
+
+10.src = src/%.cpp
+
