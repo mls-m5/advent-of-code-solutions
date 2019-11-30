@@ -45,3 +45,4 @@ copy  += %ex.txt
 12.out = %
 
 13.out = %
+13.copy += 13ex2.txt

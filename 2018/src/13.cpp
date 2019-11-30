@@ -203,6 +203,11 @@ public:
 
 	bool tick() {
 		bool isCrash = false;
+		for (auto &cart: _carts) {
+			if (cart.dir == Crashed) {
+				cart.dir = None;
+			}
+		}
 		for (int y = 0; y < _height; ++y) {
 			for (int x = 0; x < _width; ++x) {
 				if (moveCart(x, y)) {
@@ -214,6 +219,19 @@ public:
 			cart.moved = false;
 		}
 		return isCrash;
+	}
+
+	int cartnum() {
+		int sum = 0;
+		for (auto &cart: _carts) {
+			if (cart.dir == Crashed) {
+				cart.dir = None;
+			}
+			else if (cart.dir) {
+				++sum;
+			}
+		}
+		return sum;
 	}
 
 	void print(bool includeCarts = true) {
@@ -230,6 +248,22 @@ public:
 			}
 			cout << endl;
 		}
+	}
+
+	pair<int, int> lastCart() {
+		for (auto &cart: _carts) {
+			if (cart.dir == Crashed) {
+				cart.dir = None;
+			}
+		}
+		for (int y = 0; y < _height; ++y) {
+			for (int x = 0; x < _width; ++x) {
+				if (cartAt(x, y).dir) {
+					return {x, y};
+				}
+			}
+		}
+		throw runtime_error("no cart found");
 	}
 
 private:
@@ -253,21 +287,48 @@ int main(int argc, char **argv) {
 		isTest = true;
 	}
 
-	const string filename = isTest? "13ex.txt": "13.txt";
 
-	Tracks tracks(filename);
+	{
+		// Part 1
+		const string filename = isTest? "13ex.txt": "13.txt";
+		Tracks tracks(filename);
 
-	tracks.print(false);
-	tracks.print();
+		if (isTest)tracks.print(false);
+		if (isTest)tracks.print();
 
-	bool running = true;
+		bool running = true;
 
-	for (int i = 0; running; ++i) {
-		if (tracks.tick()) {
-			cout << "crash" << endl;
-			running = false;
+		while (running) {
+			if (tracks.tick()) {
+				cout << "crash" << endl;
+				running = false;
+			}
+			if (isTest) tracks.print();
 		}
-		if (!isTest)tracks.print();
+	}
+
+	{
+		// Part 2
+		cout << "part 2----" << endl;
+		const string filename = isTest? "13ex2.txt": "13.txt";
+		Tracks tracks(filename);
+
+		if (isTest)tracks.print();
+
+		bool running = true;
+
+		while (running) {
+			tracks.tick();
+			if (tracks.cartnum() <= 1) {
+				running = false;
+			}
+			if (isTest) tracks.print();
+			if (isTest) cout << tracks.cartnum() << endl;
+		}
+
+		auto coord = tracks.lastCart();
+
+		cout << "answer 2: position of last cart " << coord.first << "," << coord.second << endl;
 	}
 }
 
