@@ -9,6 +9,7 @@
 #include <map>
 #include <fstream>
 #include <vector>
+#include <iomanip>
 
 using namespace std;
 
@@ -95,16 +96,39 @@ int main(int argc, char **argv) {
 		isTest = true;
 	}
 
-	PotState state(isTest? "12ex.txt": "12.txt");
-	cout << "0\t";
-	state.print();
-
-	for (int i = 1; i <= 20; ++i) {
-		cout << i << "\t";
-		state.step();
+	const PotState origin(isTest? "12ex.txt": "12.txt");
+	{
+		auto state = origin;
+		cout << setw(5) << 0;
 		state.print();
+
+		for (int i = 1; i <= 20; ++i) {
+			cout << setw(5) << i;
+			state.step();
+			state.print();
+		}
 	}
 
+	// Part 2
+
+	{
+		cout << "part 2 --- " << endl;
+		auto state = origin;
+		int previousSum = state.sum();
+		int diff = 0;
+		for (int i = 1; i <= 200; ++i) {
+			cout << setw(5) << i;
+			state.print();
+			state.step();
+			auto sum = state.sum();
+			diff = sum - previousSum;
+			previousSum = sum;
+		}
+		cout << "sum at generation 200: " << previousSum << " with diff " << diff << endl;
+
+		long longRangeSum = (50000000000l - 200) * diff + previousSum;
+		cout << "answer 2: sum = " << longRangeSum;
+	}
 }
 
 
