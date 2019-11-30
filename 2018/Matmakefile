@@ -41,3 +41,5 @@ copy  += %ex.txt
 11.out = %
 11.copy = #
 11.flags += -O3
+
+12.out = %
