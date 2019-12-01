@@ -6,10 +6,26 @@
 
 using namespace std;
 
-int fuel (int mass) {
+int fuel (int mass, bool recurse = false) {
 	int fuel = mass / 3 - 2; // int automatically round
 
-	return fuel;
+	if (recurse && fuel > 0) {
+		fuel += ::fuel(fuel, true);
+	}
+
+	return fuel > 0? fuel: 0;
+}
+
+int totalFuel(const vector<int> &masses, bool recurse) {
+	vector <int> moduleFuels;
+
+	for (auto mass: masses) {
+		moduleFuels.push_back(fuel(mass, recurse));
+	}
+
+	int totalFuel = accumulate(moduleFuels.begin(), moduleFuels.end(), 0);
+
+	return totalFuel;
 }
 
 vector<int> loadMasses(string filename) {
@@ -32,17 +48,15 @@ int main(int argc, char **argv) {
 	}
 	const string filename = isTest? "data/1.ex.txt": "data/1.txt";
 
+
+
 	const auto masses = loadMasses(filename);
 
-	vector <int> moduleFuels;
+	// Part 1
+	cout << "answer 1 " << totalFuel(masses, false) << endl;
 
-	for (auto mass: masses) {
-		moduleFuels.push_back(fuel(mass));
-	}
-
-	int totalFuel = accumulate(moduleFuels.begin(), moduleFuels.end(), 0);
-
-	cout << "answer 1 " << totalFuel << endl;
+	// Part 2
+	cout << "answer 2 " << totalFuel(masses, true) << endl;
 
 	return 0;
 }
