@@ -3,11 +3,12 @@
 #include <vector>
 #include <fstream>
 #include <numeric>
+#include <iterator>
 
 using namespace std;
 
 int fuel (int mass, bool recurse = false) {
-	int fuel = mass / 3 - 2; // int automatically round
+	int fuel = mass / 3 - 2; // int automatically rounds down
 
 	if (recurse && fuel > 0) {
 		fuel += ::fuel(fuel, true);
@@ -17,40 +18,21 @@ int fuel (int mass, bool recurse = false) {
 }
 
 int totalFuel(const vector<int> &masses, bool recurse) {
-	vector <int> moduleFuels;
-
+	int total = 0;
 	for (auto mass: masses) {
-		moduleFuels.push_back(fuel(mass, recurse));
+		total += fuel(mass, recurse);
 	}
-
-	int totalFuel = accumulate(moduleFuels.begin(), moduleFuels.end(), 0);
-
-	return totalFuel;
-}
-
-vector<int> loadMasses(string filename) {
-	vector<int> masses;
-
-	ifstream file(filename);
-
-	for (int mass; file >> mass;) {
-		masses.push_back(mass);
-	}
-
-	return masses;
+	return total;
 }
 
 
 int main(int argc, char **argv) {
-	bool isTest = false;
-	if (argc > 1 && string(argv[1]) == "--test") {
-		isTest = true;
-	}
-	const string filename = isTest? "data/1.ex.txt": "data/1.txt";
+	const bool isTest = argc > 1 && string(argv[1]) == "--test";
 
-
-
-	const auto masses = loadMasses(filename);
+	ifstream file(isTest? "data/1.ex.txt": "data/1.txt");
+	const vector <int> masses (
+			(istream_iterator<int>(file)),
+			istream_iterator<int>());
 
 	// Part 1
 	cout << "answer 1 " << totalFuel(masses, false) << endl;
