@@ -1,7 +1,7 @@
 Advent of Code in c++
 ===============
 
-Some solutions to Advent of Code.
+Some solutions to Advent of Code in C++ and alternatives in python
 
 
 
