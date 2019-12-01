@@ -1,6 +1,12 @@
 2018/build/
+2019/build/
 
 # eclipse stuff
 2018/.cproject
 2018/.project
 2018/.settings/
+
+
+2019/.cproject
+2019/.project
+2019/.settings/

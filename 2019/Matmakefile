@@ -1,0 +1,16 @@
+
+# Matmake file
+# https://github.com/mls-m5/matmake
+
+# global flags:
+config   += debug c++14 Wall
+flags    += -Wno-unused-parameter -Wno-sign-compare
+src       = src/%.cpp
+dir       = build
+copy      = data/%.txt data/%.ex.txt
+
+
+## Main target
+1.out = %
+
+
