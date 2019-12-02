@@ -20,85 +20,46 @@ bool isTest = false;
 vector <int> loadNumbers(string filename) {
 	string line;
 
-	{
-		ifstream file(filename);
-		getline(file, line);
-	}
+	ifstream file(filename);
 
-	regex r("[0-9]+");
 	vector <int> numbers;
-
-	for (
-			auto it = sregex_iterator(line.begin(), line.end(), r);
-			it != sregex_iterator();
-			++it) {
-		numbers.push_back(stoi(it->str()));
+	for (string numstr; getline(file, numstr, ',');) {
+		numbers.push_back(stoi(numstr));
 	}
-
 	return numbers;
 }
 
 
-
 int runProgram(vector<int> numbers, int noun, int verb) {
-    
-	bool finished = false;
-
-	{
-		auto data = numbers;
-		
-		if (!isTest) {
-		    data[1] = noun;
-		    data[2] = verb;
-		}
-
-		for (int index = 0; !finished; ) {
-		    cout << "index " << index << endl;
-			auto &command = data[index];
-			
-			auto datapos1 = data[index + 1];
-			cout << "datapos 1 " << datapos1 << endl;
-			auto &data1 = data[datapos1];
-			auto datapos2 = data[index + 2];
-			cout << "datapos 2 " << datapos2 << endl;
-			auto &data2 = data[datapos2];
-			auto &targetPos = data[index + 3];
-			auto &output = data[targetPos];
-			switch (command) {
-			case 1:
-				output = data1 + data2;
-				cout << "add" << endl;
-				cout << " --> " << output<< endl;
-				cout << "targetPos" << targetPos << endl;
-				index += 4;
-				break;
-			case 2:
-				output = data1 * data2;
-				
-				cout << "multiply" << endl;
-				index += 4;
-				break;
-			case 99:
-				finished = true;
-				cout << "exit" << endl;
-				index += 1;
-				break;
-			default:
-				cout << "error" << endl;
-				finished = true;
-				break;
-			}
-			
-			for (auto n: data) {
-			    cout << n << ",";
-		    }
-		    cout << endl;
-
-		}
-
-        
-        return data[0];
+	if (!isTest) {
+		numbers[1] = noun;
+		numbers[2] = verb;
 	}
+
+	bool finished = false;
+	for (int index = 0; !finished; index += 4) {
+		auto command = numbers[index];
+		auto input1 = numbers[numbers[index + 1]];
+		auto input2 = numbers[numbers[index + 2]];
+		auto &output = numbers[numbers[index + 3]];
+		switch (command) {
+		case 1:
+			output = input1 + input2;
+			break;
+		case 2:
+			output = input1 * input2;
+			break;
+		case 99:
+			finished = true;
+			break;
+		default:
+			finished = true;
+			break;
+		}
+
+	}
+
+	return numbers[0];
 }
 
 
