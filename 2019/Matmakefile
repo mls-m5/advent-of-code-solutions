@@ -5,6 +5,7 @@
 # global flags:
 config   += debug c++14 Wall
 flags    += -Wno-unused-parameter -Wno-sign-compare
+flags += -g
 src       = src/%.cpp
 dir       = build
 copy      = data/%.txt data/%.ex.txt
@@ -14,5 +15,7 @@ copy      = data/%.txt data/%.ex.txt
 1.out = %
 
 2.out = %
+
+3.out = %
 
 #
