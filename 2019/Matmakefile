@@ -18,4 +18,7 @@ copy      = data/%.txt data/%.ex.txt
 
 3.out = %
 
+4.out = %
+4.copy = #no input file needed
+
 #
