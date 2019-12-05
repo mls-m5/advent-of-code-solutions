@@ -38,22 +38,13 @@ int getThousand(int n) {
 	return (n / 1000) % 10;
 }
 
-int runProgram(vector<int> numbers/*, int noun, int verb*/, int input) {
-//	if (!isTest) {
-//		numbers[1] = noun;
-//		numbers[2] = verb;
-//	}
-
-
-
+int runProgram(vector<int> numbers/*, int noun, int verb*/, int userInput) {
 	bool finished = false;
 	for (int index = 0; !finished; ) {
 		auto commandValue = numbers[index];
 		auto mod1 = getHundred(commandValue);
 		auto mod2 = getThousand(commandValue);
-		cout << "commandvalue " << commandValue << endl;
 
-//		auto command = numbers[index];
 		auto command = commandValue % 100;
 		auto *input1 = &numbers[numbers[index + 1]];
 		if (mod1) {
@@ -65,26 +56,52 @@ int runProgram(vector<int> numbers/*, int noun, int verb*/, int input) {
 		}
 		auto &output = numbers[numbers[index + 3]]; // Always in position mode
 		switch (command) {
-		case 1:
+		case 1: // add
 			output = *input1 + *input2;
 			index += 4;
 			break;
-		case 2:
+		case 2: // multiply
 			output = *input1 * *input2;
 			index += 4;
 			break;
-		case 3:
-			index += 2;
+		case 3: // input
 			if (mod1) {
 				throw runtime_error("cannot write input to absolute value");
 			}
-			output = input;
-			cout << "input> " << input << endl;
+			*input1 = userInput;
+			cout << "input> " << userInput << endl;
+
+			index += 2;
+			break;
+		case 4: // output
+			cout << "output: " << *input1 << endl;
+			index += 2;
+			break;
+		case 5: // jump if true
+			if (*input1) {
+				index = *input2;
+			}
+			else {
+				index += 3;
+			}
+			break;
+		case 6: // jump if false
+			if (!*input1) {
+				index = *input2;
+			}
+			else {
+				index += 3;
+			}
+			break;
+		case 7: // less than
+			output = *input1 < *input2;
+			index += 4;
 
 			break;
-		case 4:
-			index += 2;
-			cout << "output: " << *input1 << endl;
+		case 8: // equals
+			output = *input1 == *input2;
+			index += 4;
+
 			break;
 		case 99:
 			finished = true;
@@ -116,6 +133,22 @@ int main(int argc, char **argv) {
 		runProgram({3,0,4,0,99}, 1);
 		runProgram({1002,4,3,4,33}, 1);
 		runProgram({1101,100,-1,4,0}, 1);
+
+		cout << "tests for part 2" << endl;
+		runProgram({3,9,8,9,10,9,4,9,99,-1,8}, 1);
+		runProgram({3,9,8,9,10,9,4,9,99,-1,8}, 8);
+
+		cout << "test2" << endl;
+		runProgram({3,9,7,9,10,9,4,9,99,-1,8}, 1);
+		runProgram({3,9,7,9,10,9,4,9,99,-1,8}, 10);
+
+		cout << "test3" << endl;
+		runProgram({3,3,1108,-1,8,3,4,3,99}, 1);
+		runProgram({3,3,1108,-1,8,3,4,3,99}, 8);
+
+		cout << "test4" << endl;
+		runProgram({3,3,1107,-1,8,3,4,3,99}, 1);
+		runProgram({3,3,1107,-1,8,3,4,3,99}, 10);
 	}
 	else {
 
@@ -123,17 +156,11 @@ int main(int argc, char **argv) {
 
 
 		runProgram(numbers, 1);
-//    cout << "answer 1: " << runProgram(numbers, 12, 2) << endl;
-//
-//    for (int noun = 0; noun < 100; ++noun) {
-//        for (int verb = 0; verb < 100; ++verb) {
-//            if (19690720 == runProgram(numbers, noun, verb)) {
-//                cout << "noun: " << noun << " verb " << verb << endl;
-//                cout << "answer 2: " << noun * 100 + verb << endl;
-//                return 0;
-//            }
-//        }
-//    }
+
+
+		// Part 2
+
+		runProgram(numbers, 5);
 	}
 }
 
