@@ -27,4 +27,6 @@ copy      = data/%.txt data/%.ex.txt
 
 7.out = %
 
+8.out = %
+
 #
