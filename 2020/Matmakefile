@@ -1,0 +1,20 @@
+# Matmake file
+# https://github.com/mls-m5/matmake
+
+#cpp = clang++-9
+
+cppflags +=                 # c++ only flags
+cflags +=                   # c only flags
+
+config += c++17 Wall debug
+
+dir = bin
+
+includes += include
+
+src = src/%.cpp
+
+d1.out = %
+d1.copy = data/*
+d1.libs += -lstdc++fs
+

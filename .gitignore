@@ -12,3 +12,13 @@
 2019/.settings/
 
 2019/.pydevproject
+
+*.includes
+*.cxxflags
+*.files
+*.cflags
+*.creator.user
+*.config
+*.creator
+
+2020/bin
