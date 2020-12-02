@@ -9,12 +9,11 @@ cflags +=                   # c only flags
 config += c++17 Wall debug
 
 dir = bin
-
 includes += include
-
 src = src/%.cpp
+libs += -lstdc++fs
 
 d1.out = %
 d1.copy = data/*
-d1.libs += -lstdc++fs
+d2.out = %
 
