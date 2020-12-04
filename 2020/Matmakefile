@@ -16,4 +16,5 @@ libs += -lstdc++fs
 d1.out = %
 d1.copy = data/*
 d2.out = %
+d3.out = %
 
