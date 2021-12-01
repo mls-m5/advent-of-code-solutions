@@ -1,0 +1,18 @@
+
+# using matmake2: https://github.com/laserskold/matmake2
+
+01
+  out = 01
+  src =
+    src/01.cpp
+  config =
+    c++17
+    Wall
+  command = [exe]
+
+all
+  copy = data
+  in = @01
+  includes =
+    include
+
