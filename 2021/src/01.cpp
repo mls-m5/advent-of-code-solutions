@@ -22,23 +22,41 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    //    auto depths = std::vector<int>{};
+    auto depths = std::vector<int>{};
 
     int previous = {};
     file >> previous;
+    depths.push_back(previous);
 
     int sum = 0;
 
     for (int depth; file >> depth;) {
-        std::cout << depth << "\n";
 
         if (depth > previous) {
-            std::cout << "increased\n";
             ++sum;
         }
 
         previous = depth;
+
+        depths.push_back(depth);
     }
 
     std::cout << "sum " << sum << std::endl;
+
+    int previousWindow = depths.at(0) + depths.at(1) + depths.at(2);
+    int windowSum = 0;
+
+    std::cout << "first " << previousWindow;
+
+    for (size_t i = 2; i < depths.size(); ++i) {
+        int window = depths.at(i + 0) + depths.at(i - 1) + depths.at(i - 2);
+
+        if (window > previousWindow) {
+            ++windowSum;
+        }
+
+        previousWindow = window;
+    }
+
+    std::cout << "windowed sum " << windowSum << std::endl;
 }
