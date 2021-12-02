@@ -5,14 +5,22 @@
   out = 01
   src =
     src/01.cpp
-  config =
-    c++17
-    Wall
+  command = [exe]
+
+02
+  out = 02
+  src =
+    src/02.cpp
   command = [exe]
 
 all
   copy = data
-  in = @01
+  config =
+    c++17
+    Wall
+  in =
+     @01
+     @02
   includes =
     include
 
