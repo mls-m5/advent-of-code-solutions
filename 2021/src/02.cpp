@@ -8,23 +8,37 @@ using namespace std::literals;
 
 void solve(std::istream &file) {
     std::string direction;
+    // For part 1
     int x = 0;
     int y = 0;
+
+    // For part 2
+    int x2 = 0;
+    int y2 = 0;
+    int aim = 0;
     for (int amount; file >> direction, file >> amount;) {
-        std::cout << direction << " " << amount << "\n";
         if (direction == "forward") {
             x += amount;
+            x2 += amount;
+            y2 += aim * amount;
         }
         else if (direction == "up") {
             y -= amount;
+            aim -= amount;
         }
         else if (direction == "down") {
             y += amount;
+            aim += amount;
         }
     }
 
+    std::cout << "\npart 1:\n";
     std::cout << "x = " << x << ", y = " << y << "\n";
-    std::cout << x * y << std::endl;
+    std::cout << x * y << "\n";
+
+    std::cout << "\npart 2:\n";
+    std::cout << "x = " << x2 << ", y = " << y2 << "\n";
+    std::cout << x2 * y2 << std::endl;
 }
 
 std::ifstream openFile(int argc, char *argv[]) {
