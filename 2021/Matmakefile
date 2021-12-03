@@ -3,14 +3,17 @@
 
 01
   out = 01
-  src =
-    src/01.cpp
+  src = src/01.cpp
   command = [exe]
 
 02
   out = 02
-  src =
-    src/02.cpp
+  src = src/02.cpp
+  command = [exe]
+
+03
+  out = 03
+  src = src/03.cpp
   command = [exe]
 
 all
@@ -21,6 +24,7 @@ all
   in =
      @01
      @02
+     @03
   includes =
     include
 
