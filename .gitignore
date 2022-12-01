@@ -22,3 +22,6 @@
 *.creator
 
 2020/bin
+
+.qtc_clangd
+build
