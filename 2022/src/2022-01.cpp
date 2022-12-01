@@ -21,7 +21,11 @@ int main(int argc, char *argv[]) {
 
     std::sort(calories.begin(), calories.end());
 
-    std::cout << calories.back() << std::endl;
+    std::cout << "answer to first question: " << calories.back() << std::endl;
 
+    std::cout << "answer to second question: "
+              << calories.at(calories.size() - 3) +
+                     calories.at(calories.size() - 2) + calories.back()
+              << std::endl;
     return 0;
 }
