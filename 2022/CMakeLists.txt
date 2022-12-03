@@ -1,25 +1,13 @@
 project(aoc-2022)
 
+function(day name)
+    add_executable(${name} src/2022-${name}.cpp)
+    set_property(TARGET ${name} PROPERTY CXX_STANDARD 20)
+    add_test(NAME ${name} COMMAND ${name})
+endfunction()
 
+day(01)
+day(02)
+day(03)
 
-add_executable(
-    01
-    src/2022-01.cpp
-    )
-
-set_property(TARGET 01 PROPERTY CXX_STANDARD 20)
-
-add_executable(
-    02
-    src/2022-02.cpp
-    )
-
-set_property(TARGET 02 PROPERTY CXX_STANDARD 20)
-
-
-file(
-    COPY
-    data
-    DESTINATION
-    .
-    )
+file(COPY data DESTINATION .)
