@@ -1,7 +1,6 @@
 #include "input.h"
 #include <iostream>
 #include <regex>
-#include <sstream>
 
 using Pair = std::pair<int, int>;
 
