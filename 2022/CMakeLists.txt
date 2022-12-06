@@ -6,10 +6,11 @@ function(day name)
     add_test(NAME ${name} COMMAND ${name})
 endfunction()
 
+
+file(COPY data DESTINATION .)
+
 day(01)
 day(02)
 day(03)
 day(04)
 day(05)
-
-file(COPY data DESTINATION .)
