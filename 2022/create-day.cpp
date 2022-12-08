@@ -26,6 +26,9 @@ auto srcContent = R"_(
 int main(int argc, char *argv[]) {
     auto file = openFile("0x", argc, argv);
 
+    for (std::string line; getline(file, line);) {
+        std::cout << line << "\n";
+    }
 }
 
 )_";
