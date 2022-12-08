@@ -1,4 +1,3 @@
-
 #include "input.h"
 #include <iostream>
 
@@ -8,18 +7,13 @@ int main(int argc, char *argv[]) {
     auto trees = std::vector<std::string>{};
 
     for (std::string line; getline(file, line);) {
-        std::cout << line << "\n";
         trees.push_back(line);
     }
-
-    auto width = trees.front().size();
-    auto height = trees.size();
+    auto width = trees.front().size(), height = trees.size();
 
     auto at = [&trees](int x, int y) -> int { return trees.at(y).at(x) - '0'; };
 
     auto isVisible = [&](int tx, int ty) -> bool {
-        //        auto hleft = at(0, ty), hright = at(width - 1, ty);
-        //        auto hup = at(tx, 0), hdown = at(tx, height - 1);
         int hleft = 0, hright = 0;
         int hup = 0, hdown = 0;
         for (int x = 0; x < tx; ++x) {
@@ -39,27 +33,48 @@ int main(int argc, char *argv[]) {
         return h > hleft || h > hright || h > hup || h > hdown;
     };
 
-    int visible = width * 2 + height * 2 - 4; // Edge trees
-    for (int y = 1; y < height - 1; ++y) {
-        std::cout << "-";
-        for (int x = 1; x < width - 1; ++x) {
-            auto v = isVisible(x, y);
+    auto scenicScore = [&](int tx, int ty) {
+        auto h = at(tx, ty);
+        int hleft = 0, hright = 0;
+        int hup = 0, hdown = 0;
 
-            if (v) {
-                std::cout << '*';
+        for (int x = tx - 1; x >= 0; --x) {
+            ++hleft;
+            if (at(x, ty) >= h) {
+                break;
             }
-            else {
-                std::cout << at(x, y);
-            }
-
-            visible += isVisible(x, y);
         }
+        for (int x = tx + 1; x < width; ++x) {
+            ++hright;
+            if (at(x, ty) >= h) {
+                break;
+            }
+        }
+        for (int y = ty - 1; y >= 0; --y) {
+            ++hup;
+            if (at(tx, y) >= h) {
+                break;
+            }
+        }
+        for (int y = ty + 1; y < height; ++y) {
+            ++hdown;
+            if (at(tx, y) >= h) {
+                break;
+            }
+        }
+        return hleft * hright * hup * hdown;
+    };
 
-        std::cout << "\n";
+    int visible = width * 2 + height * 2 - 4; // Edge trees
+    int sscore = 0;
+
+    for (int y = 1; y < height - 1; ++y) {
+        for (int x = 1; x < width - 1; ++x) {
+            visible += isVisible(x, y);
+            sscore = std::max(sscore, scenicScore(x, y));
+        }
     }
 
     std::cout << "result 1: " << visible << "\n";
-
-    std::cout.flush();
-    return 0;
+    std::cout << "result 1: " << sscore << "\n";
 }
