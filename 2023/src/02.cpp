@@ -13,8 +13,10 @@ auto limits = std::map<std::string, int>{
     {"blue", 14},
 };
 
-int game(std::string line) {
+std::pair<int, int> game(std::string line) {
     int id = 0;
+
+    auto max = std::map<std::string, int>{};
 
     {
         auto f = line.find(":");
@@ -22,37 +24,42 @@ int game(std::string line) {
         line = line.substr(f + 2);
     }
 
-    std::cout << id << ": " << line << std::endl;
-
     auto ss = std::istringstream{line};
 
     for (std::string set; std::getline(ss, set, ';');) {
-        std::cout << set << "\n";
 
         auto ss2 = std::istringstream{set};
         for (std::string n, c; ss2 >> n >> c;) {
             if (c.back() == ',') {
                 c.pop_back();
             }
-            std::cout << n << " " << c << "\n";
-            if (std::stoi(n) > limits.at(c)) {
-                std::cout << "no\n";
-                return 0;
+            auto number = std::stoi(n);
+            if (number > limits.at(c)) {
+                id = 0;
             }
+
+            auto &m = max[c];
+            m = std::max(m, number);
         }
     }
 
-    return id;
+    int power = max["red"] * max["green"] * max["blue"];
+
+    return {id, power};
 }
 
 int main(int argc, char *argv[]) {
     auto file = std::ifstream{std::string{"data/02"} +
                               (argc <= 1 ? ".txt" : "-test.txt")};
     int sum = 0;
+    int sum2 = 0;
 
     for (std::string line; std::getline(file, line);) {
-        sum += game(line);
+        auto [id, power] = game(line);
+        sum += id;
+        sum2 += power;
     }
 
-    std::cout << sum << "\n";
+    std::cout << "answer 1: " << sum << "\n";
+    std::cout << "answer 2: " << sum2 << "\n";
 }
