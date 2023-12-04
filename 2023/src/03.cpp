@@ -13,7 +13,9 @@ struct Num {
     std::string value;
     std::string symbols;
 
-    bool isActive = false;
+    bool isActive() {
+        return !symbols.empty();
+    }
 
     int intValue() {
         return std::stoi(value);
@@ -32,6 +34,13 @@ struct Num {
 struct Symbol {
     int x = 0;
     int y = 0;
+    int ratio = 1;
+    int count = 0;
+
+    void multiply(int value) {
+        ratio *= value;
+        ++count;
+    }
 
     char value = 0;
 };
@@ -82,29 +91,30 @@ int main(int argc, char *argv[]) {
     for (auto &number : numbers) {
         for (auto &symbol : symbols) {
             if (number.isNear(symbol.x, symbol.y)) {
-                number.isActive = true;
                 number.symbols += symbol.value;
+                symbol.multiply(number.intValue());
             }
         }
     }
 
+    int sum1 = 0;
     for (auto &number : numbers) {
         std::cout << "n: " << number.value << ", " << number.x << ", "
                   << number.y << " active? " << number.symbols << "\n";
+        auto val = number.intValue() * number.isActive();
+        sum1 += val;
+        std::cout << val << "\n";
     }
 
+    int sum2 = 0;
     for (auto &symbol : symbols) {
         std::cout << "s: " << symbol.value << ", " << symbol.x << ", "
-                  << symbol.y << "\n";
-    }
-
-    int sum1 = 0;
-    for (auto &number : numbers) {
-        sum1 += number.intValue() * number.isActive;
-        std::cout << number.intValue() * number.isActive << "\n";
+                  << symbol.y << ", ratio: " << symbol.ratio << "\n";
+        sum2 += symbol.ratio * (symbol.count > 1);
     }
 
     std::cout << "sum 1: " << sum1 << "\n";
+    std::cout << "sum 2: " << sum2 << "\n";
 
     return 0;
 }
