@@ -12,3 +12,4 @@ file(COPY data DESTINATION .)
 
 day(01)
 day(02)
+day(03)
