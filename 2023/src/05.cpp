@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <fstream>
+#include <future>
 #include <iostream>
 #include <istream>
 #include <limits>
@@ -86,19 +87,53 @@ int main(int argc, char *argv[]) {
     for (auto &seed : seeds) {
         std::cout << seed << " ";
     }
+    std::cout << "\n";
+
+    auto remap = [&maps](SizeT seed) {
+        for (auto &map : maps) {
+            seed = map.at(seed);
+        }
+        return seed;
+    };
+
+    auto results = std::vector<std::future<SizeT>>{};
+
+    for (size_t i = 0; i < seeds.size(); ++i, ++i) {
+        auto f = [i, &seeds, remap] {
+            auto localMin = std::numeric_limits<SizeT>::max();
+            std::cout << i << "/" << seeds.size() << std::endl;
+
+            for (int index = 0; index < seeds.at(i + 1); ++index) {
+                auto seed = seeds.at(i) + index;
+
+                auto value = remap(seed);
+
+                localMin = std::min(localMin, value);
+            }
+
+            std::cout << i << "/" << seeds.size() << " done -> " << localMin
+                      << " ..." << std::endl;
+            return localMin;
+        };
+
+        results.push_back(std::async(f));
+    }
+
+    auto min = std::numeric_limits<SizeT>::max();
+    for (auto &res : results) {
+        min = std::min(res.get(), min);
+        std::cout << "current min: " << min << std::endl;
+    }
+
+    std::cout << "calculated min:" << min << std::endl;
 
     std::cout << "\n";
 
-    for (auto &map : maps) {
-        for (auto &seed : seeds) {
-            seed = map.at(seed);
-
-            std::cout << seed << " ";
-        }
-
-        std::cout << "\n";
+    for (auto &seed : seeds) {
+        seed = remap(seed);
     }
 
     std::cout << "answer 1: " << *std::min_element(seeds.begin(), seeds.end())
               << std::endl;
+    std::cout << "answer 2: " << min << std::endl;
 }
