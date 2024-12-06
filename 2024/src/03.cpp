@@ -1,5 +1,4 @@
 #include <cctype>
-#include <charconv>
 #include <format>
 #include <fstream>
 #include <iostream>
@@ -20,9 +19,20 @@ int main(int argc, char *argv[]) {
     std::cout << content << std::endl;
 
     int sum1 = 0;
+    int sum2 = 0;
+    bool isEnabled = true;
 
     for (auto view = std::string_view{content}; !view.empty();
          view.remove_prefix(1)) {
+
+        if (view.starts_with("do()")) {
+            isEnabled = true;
+            continue;
+        }
+        if (view.starts_with("don't()")) {
+            isEnabled = false;
+            continue;
+        }
         if (!view.starts_with("mul(")) {
             continue;
         }
@@ -38,7 +48,6 @@ int main(int argc, char *argv[]) {
         }
         int i1 = 0;
         ss1 >> i1;
-        // std::cout << ss1.str() << std::endl;
 
         char c = view.front();
         if (c != ',') {
@@ -52,7 +61,6 @@ int main(int argc, char *argv[]) {
         }
         int i2 = 0;
         ss2 >> i2;
-        // std::cout << ss2.str() << std::endl;
 
         c = view.front();
         if (c != ')') {
@@ -61,7 +69,9 @@ int main(int argc, char *argv[]) {
 
         std::cout << std::format(" {}*{}={}\n", i1, i2, i1 * i2);
         sum1 += i1 * i2;
+        sum2 += i1 * i2 * isEnabled;
     }
 
     std::cout << std::format("Part 1: {}\n", sum1);
+    std::cout << std::format("Part 2: {}\n", sum2);
 }
