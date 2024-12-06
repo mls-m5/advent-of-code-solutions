@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <cstdlib>
 #include <format>
 #include <fstream>
@@ -70,16 +69,29 @@ int count(const VecVec &v, std::string_view str) {
     for (auto &line : v) {
         for (size_t x = 0; (x = line.find(str, x)) != std::string::npos;
              x += str.size()) {
-            std::cout << x << line.substr(0, x) << "!"
-                      << line.substr(x, str.size()) << "!"
-                      << line.substr(x + str.size()) << "\n";
             ++sum;
         }
     }
 
-    std::cout << std::format("count {}\n", sum);
-    std::cout << "\n";
+    return sum;
+}
 
+int countMasCross(const VecVec &v) {
+    int sum = 0;
+    for (size_t y = 2; y < v.size(); ++y) {
+        for (size_t x = 2; x < v.size(); ++x) {
+            if (v.at(y - 2).at(x - 2) != 'M' || v.at(y).at(x - 2) != 'M') {
+                continue;
+            }
+            if (v.at(y - 1).at(x - 1) != 'A') {
+                continue;
+            }
+            if (v.at(y - 2).at(x) != 'S' || v.at(y).at(x) != 'S') {
+                continue;
+            }
+            ++sum;
+        }
+    }
     return sum;
 }
 
@@ -88,11 +100,8 @@ int main(int argc, char *argv[]) {
                               (argc <= 1 ? ".txt" : "-test.txt")};
 
     auto content = VecVec{};
-    // auto straight = Vec3{};
-    // auto staggered = Vec3{};
 
     for (std::string line; std::getline(file, line);) {
-        // std::cout << line << std::endl;
         content.push_back(line);
     }
 
@@ -100,34 +109,16 @@ int main(int argc, char *argv[]) {
     auto tmp45 = rotate45(content);
 
     auto sum1 = 0;
+    auto sum2 = 0;
     for (int i = 0; i < 4; ++i) {
-        // straight.push_back(tmp);
         tmp = rotate90(tmp);
-        print(tmp);
         sum1 += count(tmp, "XMAS");
+        sum2 += countMasCross(tmp);
 
-        print(tmp45);
         tmp45 = rotate90(tmp45);
         sum1 += count(tmp45, "X-M-A-S");
-
-        // auto flipped = tmp;
-        // std::reverse(flipped.begin(), flipped.end());
-        // sum1 += count(flipped, "XMAS");
-
-        // flipped = tmp45;
-        // std::reverse(flipped.begin(), flipped.end());
-        // sum1 += count(flipped, "X-M-A-S");
     }
 
-    // Flipped
-
-    // print(content);
-    // std::cout << count(content, "XMAS");
-
-    // std::cout << "\n";
-
-    // print(rotate90(content));
-    // print(rotate45(content));
-
     std::cout << std::format("Part 1: {}\n", sum1);
+    std::cout << std::format("Part 2: {}\n", sum2);
 }
