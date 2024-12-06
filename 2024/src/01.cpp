@@ -1,12 +1,37 @@
+#include <algorithm>
+#include <cstdlib>
+#include <format>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
+#include <vector>
 
 int main(int argc, char *argv[]) {
     auto file = std::ifstream{std::string{"data/01"} +
                               (argc <= 1 ? ".txt" : "-test.txt")};
 
+    auto v1 = std::vector<int>{};
+    auto v2 = std::vector<int>{};
+
     for (std::string line; std::getline(file, line);) {
-        std::cout << line << std::endl;
+        auto ss = std::istringstream{line};
+        auto i1 = 0;
+        auto i2 = 0;
+        ss >> i1 >> i2;
+        v1.push_back(i1);
+        v2.push_back(i2);
     }
+
+    std::sort(v1.begin(), v1.end());
+    std::sort(v2.begin(), v2.end());
+
+    int sum = 0;
+
+    for (auto it1 = v1.begin(), it2 = v2.begin(); it1 != v1.end();
+         ++it1, ++it2) {
+        sum += std::abs(*it1 - *it2);
+    }
+
+    std::cout << sum << "\n";
 }
