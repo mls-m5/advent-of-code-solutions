@@ -3,6 +3,7 @@
 #include <format>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -26,12 +27,24 @@ int main(int argc, char *argv[]) {
     std::sort(v1.begin(), v1.end());
     std::sort(v2.begin(), v2.end());
 
-    int sum = 0;
+    int sum1 = 0;
+    int sum2 = 0;
+
+    auto m = std::map<int, int>{};
 
     for (auto it1 = v1.begin(), it2 = v2.begin(); it1 != v1.end();
          ++it1, ++it2) {
-        sum += std::abs(*it1 - *it2);
+        auto a = *it1;
+        auto b = *it2;
+        sum1 += std::abs(a - b);
+
+        ++m[b];
     }
 
-    std::cout << sum << "\n";
+    for (auto v : v1) {
+        sum2 += v * m[v];
+    }
+
+    std::cout << std::format("Part 1: {}\n", sum1);
+    std::cout << std::format("Part 2: {}\n", sum2);
 }
