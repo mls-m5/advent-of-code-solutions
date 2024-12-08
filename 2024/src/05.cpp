@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstddef>
 #include <format>
 #include <fstream>
@@ -9,6 +10,31 @@
 struct Rule {
     int a = 0;
     int b = 0;
+};
+
+struct Page {
+    int number;
+    float position; // used for solving
+};
+
+struct LinkedRule {
+    Page *a = nullptr;
+    Page *b = nullptr;
+    Rule *rule = nullptr;
+
+    // Returns error
+    float apply() {
+        const auto expected = -1;
+        const auto distance = b->position - a->position;
+        const auto error = expected - distance;
+        if (error < 0) {
+            a->position -= error * .1f;
+            b->position += error * .1f;
+            return error;
+        }
+
+        return 0;
+    }
 };
 
 bool isManualValid(const std::vector<int> &manual,
@@ -25,6 +51,61 @@ bool isManualValid(const std::vector<int> &manual,
         }
     }
     return true;
+}
+
+std::vector<int> sortManual(const std::vector<int> &values,
+                            std::vector<Rule> rules) {
+    auto errorPages = std::vector<Page>{};
+    auto links = std::vector<LinkedRule>{};
+
+    float startLocation = 0;
+    for (auto number : values) {
+        errorPages.push_back({
+            .number = number,
+            .position = startLocation,
+        });
+
+        ++startLocation;
+    }
+
+    for (auto &rule : rules) {
+        auto fa = std::find_if(errorPages.begin(),
+                               errorPages.end(),
+                               [a = rule.a](auto &p) { return p.number == a; });
+        auto fb = std::find_if(errorPages.begin(),
+                               errorPages.end(),
+                               [b = rule.b](auto &p) { return p.number == b; });
+
+        if (fa == errorPages.end()) {
+            continue;
+        }
+        if (fb == errorPages.end()) {
+            continue;
+        }
+
+        links.push_back({
+            .a = &*fa,
+            .b = &*fb,
+            .rule = &rule,
+        });
+    }
+
+    for (float error = 100; std::abs(error) > .1;) {
+        error = 0;
+        for (auto &link : links) {
+            error += link.apply();
+        }
+    }
+
+    std::sort(errorPages.begin(), errorPages.end(), [](auto &a, auto &b) {
+        return a.position < b.position;
+    });
+
+    auto ret = decltype(values){};
+    for (auto &p : errorPages) {
+        ret.push_back(p.number);
+    }
+    return ret;
 }
 
 int main(int argc, char *argv[]) {
@@ -62,11 +143,17 @@ int main(int argc, char *argv[]) {
     }
 
     int sum1 = 0;
+    int sum2 = 0;
     for (auto &manual : manuals) {
         if (isManualValid(manual, rules)) {
             sum1 += manual.at(manual.size() / 2);
         }
+        else {
+            manual = sortManual(manual, rules);
+            sum2 += manual.at(manual.size() / 2);
+        }
     }
 
     std::cout << std::format("Part 1: {}\n", sum1);
+    std::cout << std::format("Part 2: {}\n", sum2);
 }
