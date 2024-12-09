@@ -42,6 +42,10 @@ struct Canvas {
 
     Coord guardPos;
     char guardDir = '\0';
+    bool didFinish = false;
+    int stepsSinceLastNewCell = 0;
+    int maxStepSinceLastNewCell = 0;
+    int limitBeforeBreaking = 1000;
 
     Canvas() {}
 
@@ -79,22 +83,39 @@ struct Canvas {
     bool step() {
         auto vel = charToCoord(guardDir);
         auto newPos = Coord{guardPos.x + vel.x, guardPos.y + vel.y};
+        ++stepsSinceLastNewCell;
+        maxStepSinceLastNewCell =
+            std::max(maxStepSinceLastNewCell, stepsSinceLastNewCell);
 
         if (!isInside(newPos.x, newPos.y)) {
+            didFinish = true;
             return false;
         }
 
-        if (at(newPos.x, newPos.y) == '#') {
+        if (at(newPos.x, newPos.y) == '#' || at(newPos.x, newPos.y) == 'O') {
             guardDir = nextChar(guardDir);
         }
         else {
             // print();
 
             guardPos = newPos;
-            at(guardPos.x, guardPos.y) = 'X';
+            auto &c = at(guardPos.x, guardPos.y);
+            if (c != 'X') {
+                c = 'X';
+                stepsSinceLastNewCell = 0;
+            }
         }
 
         return true;
+    }
+
+    void run() {
+        for (; step();) {
+            if (maxStepSinceLastNewCell > limitBeforeBreaking) {
+                return;
+            }
+        }
+        didFinish = true;
     }
 
     int count() {
@@ -123,11 +144,34 @@ int main(int argc, char *argv[]) {
 
     canvas.print();
     canvas.parsePosition();
+    auto copy = canvas;
 
-    for (; canvas.step();) {
-    }
+    canvas.run();
+
+    canvas.print();
 
     auto sum1 = canvas.count();
 
     std::cout << std::format("Part 1: {}\n", sum1);
+
+    int sum2 = 0;
+    for (size_t y = 0; y < canvas.lines.size(); ++y) {
+        for (size_t x = 0; x < canvas.lines.front().size(); ++x) {
+            auto tmpCanvas = copy;
+
+            auto &c = tmpCanvas.at(x, y);
+            if (c == '#') {
+                continue;
+            }
+
+            c = 'O';
+            // tmpCanvas.print();
+            tmpCanvas.run();
+            // tmpCanvas.print();
+
+            sum2 += !tmpCanvas.didFinish;
+        }
+    }
+
+    std::cout << std::format("Part 2: {}\n", sum2);
 }
