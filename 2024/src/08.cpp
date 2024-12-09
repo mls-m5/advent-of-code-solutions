@@ -86,6 +86,24 @@ struct Canvas {
         }
     }
 
+    void combine2(const Antenna &a, const Antenna &b) {
+        auto dx = b.x - a.x;
+        auto dy = b.y - a.y;
+
+        for (int nx = b.x, ny = b.y; isInside(nx, ny); nx += dx, ny += dy) {
+            at(nx, ny) = '#';
+        }
+    }
+
+    void placeAllNodes(const std::vector<Antenna> &antennas) {
+        for (auto i : iota_view(0uz, antennas.size())) {
+            for (auto j : iota_view(i + 1, antennas.size())) {
+                combine2(antennas.at(i), antennas.at(j));
+                combine2(antennas.at(j), antennas.at(i));
+            }
+        }
+    }
+
     int count() {
         return width * height - std::count(data.begin(), data.end(), '.');
     }
@@ -103,6 +121,7 @@ int main(int argc, char *argv[]) {
 
     auto inputMap = Canvas{content};
     auto resultMap = Canvas{inputMap.width, inputMap.height};
+    auto resultMap2 = Canvas{inputMap.width, inputMap.height};
 
     inputMap.print();
     auto antennas = inputMap.uniqueCharacters();
@@ -112,8 +131,11 @@ int main(int argc, char *argv[]) {
             "character {}: {}\n", antenna.first, antenna.second.size());
 
         resultMap.placeNodes(antenna.second);
+        resultMap2.placeAllNodes(antenna.second);
     }
     resultMap.print();
+    resultMap2.print();
 
     std::cout << std::format("Part 1: {}\n", resultMap.count());
+    std::cout << std::format("Part 2: {}\n", resultMap2.count());
 }
