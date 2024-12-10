@@ -155,7 +155,8 @@ int main(int argc, char *argv[]) {
     auto starts = findNumber(heightMap, 0);
 
     auto stops = findNumber(heightMap, 9);
-    auto count = std::vector<std::set<int>>(stops.size());
+    auto count1 = std::vector<std::set<int>>(stops.size());
+    auto count2 = std::vector<int>(stops.size());
 
     for (auto startingPosition : starts) {
         auto current = decltype(starts){startingPosition};
@@ -169,23 +170,32 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        for (auto i : iota_view{0uz, count.size()}) {
+        for (auto i : iota_view{0uz, count1.size()}) {
             for (auto pos : current) {
                 if (stops.at(i).coord == pos.coord) {
-                    count.at(i).insert(startingPosition.index);
-                    // ++count.at(i);
+                    count1.at(i).insert(startingPosition.index);
+                    ++count2.at(i);
                 }
             }
         }
     }
 
     int sum1 = 0;
-    for (auto c : count) {
+
+    for (auto c : count1) {
         sum1 += c.size();
         std::cout << c.size() << " ";
+    }
+
+    int sum2 = 0;
+
+    for (auto c : count2) {
+        sum2 += c;
+        std::cout << c << " ";
     }
 
     std::cout << "\n";
 
     std::cout << std::format("Part 1: {}\n", sum1);
+    std::cout << std::format("Part 2: {}\n", sum2);
 }
