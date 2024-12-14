@@ -3,6 +3,7 @@
 #include <format>
 #include <fstream>
 #include <iostream>
+#include <ostream>
 #include <ranges>
 #include <string>
 #include <vector>
@@ -73,23 +74,60 @@ Int countArea(const std::vector<Robot> &robots,
     return sum;
 }
 
-void drawRobots(const std::vector<Robot> &robots, Int step) {
-    for (auto y : iota_view(0, height)) {
-        for (auto x : iota_view(0, width)) {
-            int sum = 0;
-            for (auto &robot : robots) {
-                auto p = robot.positionAt(step);
-                sum += (p.x == x && p.y == y);
-            }
-            if (sum > 0) {
-                std::cout << sum;
-            }
-            else {
-                std::cout << ".";
-            }
-        }
-        std::cout << "\n";
+auto lines = std::vector<std::string>{};
+
+void drawRobots(std::ostream &stream,
+                const std::vector<Robot> &robots,
+                Int step) {
+
+    lines.resize(height);
+    for (auto &line : lines) {
+        line.clear();
+        line.resize(width, ' ');
     }
+
+    for (auto robot : robots) {
+        auto p = robot.positionAt(step);
+        lines.at(p.y).at(p.x) = 'x';
+    }
+
+    for (auto &line : lines) {
+        stream << line << "\n";
+    }
+
+    // for (auto y : iota_view(0, height)) {
+    //     for (auto x : iota_view(0, width)) {
+    //         int sum = 0;
+    //         for (auto &robot : robots) {
+    //             auto p = robot.positionAt(step);
+    //             sum += (p.x == x && p.y == y);
+    //         }
+    //         if (sum > 0) {
+    //             stream << sum;
+    //         }
+    //         else {
+    //             stream << " ";
+    //         }
+    //     }
+    //     stream << "\n";
+    // }
+}
+
+Int countLongestLine() {
+    auto longest = 0;
+    for (auto &line : lines) {
+        Int count = 0;
+        for (auto c : line) {
+            if (c != 'x') {
+                count = 0;
+            }
+            ++count;
+        }
+
+        longest = std::max(longest, count);
+    }
+
+    return longest;
 }
 
 int main(int argc, char *argv[]) {
@@ -123,7 +161,7 @@ int main(int argc, char *argv[]) {
     auto d =
         countArea(robots, 100, halfW + 1, halfH + 1, width + 1, height + 1);
 
-    drawRobots(robots, 100);
+    // drawRobots(robots, 100);
 
     std::cout << a << std::endl;
     std::cout << b << std::endl;
@@ -131,4 +169,20 @@ int main(int argc, char *argv[]) {
     std::cout << d << std::endl;
 
     std::cout << std::format("Part 1: {}\n", a * b * c * d);
+
+    auto ofile = std::ofstream{"robots3.txt"};
+
+    auto longest = 0;
+
+    auto nowhere = std::fstream{};
+
+    for (auto i : iota_view(0, 200000)) {
+        drawRobots(nowhere, robots, i);
+        auto count = countLongestLine();
+        // if (count > 6) {
+        longest = count;
+        ofile << std::format("step {}\n", i);
+        drawRobots(ofile, robots, i);
+        // }
+    }
 }
