@@ -16,7 +16,6 @@ struct Vec {
     int y = 0;
 
     Vec(int x, int y) : x{x}, y{y} {}
-    Vec(size_t x, size_t y) : x{static_cast<int>(x)}, y{static_cast<int>(y)} {}
 
     Vec operator+(const Vec &other) {
         return {
@@ -135,9 +134,7 @@ Vec charToCoord(char c) {
     throw std::runtime_error{"invalid direction"};
 }
 
-void tryMoveRobot(Canvas<char> &map, Vec &robot, char directionC) {
-    auto dir = charToCoord(directionC);
-
+void tryMoveRobot(Canvas<char> &map, Vec &robot, Vec dir) {
     bool canMove = false;
     auto pos = robot;
     for (; map.isInside(pos); pos.x += dir.x, pos.y += dir.y) {
@@ -170,9 +167,99 @@ void tryMoveRobot(Canvas<char> &map, Vec &robot, char directionC) {
     robot.y += dir.y;
 }
 
+Canvas<char> scaleUp(const Canvas<char> &in) {
+    auto ret = Canvas<char>{in.width * 2, in.height, '.'};
+
+    for (auto y : iota_view{0uz, in.height}) {
+        for (auto x : iota_view{0uz, in.width}) {
+            auto a = '.';
+            auto b = '.';
+
+            switch (in.at(x, y)) {
+            case '#':
+                a = '#';
+                b = '#';
+                break;
+            case 'O':
+                a = '[';
+                b = ']';
+                break;
+            case '@':
+                a = '@';
+                b = '.';
+                break;
+            }
+
+            ret.at(x * 2, y) = a;
+            ret.at(x * 2 + 1, y) = b;
+        }
+    }
+    return ret;
+}
+
+bool tryMoveVertical(Canvas<char> &map,
+                     int y,
+                     const std::vector<bool> &cellsToCheck,
+                     Vec dir) {
+    auto newRow = std::vector(cellsToCheck.size(), false);
+    for (auto x : iota_view{1uz, cellsToCheck.size() - 1}) {
+        if (!cellsToCheck.at(x)) {
+            continue;
+        }
+        auto c = map.at(Vec{static_cast<int>(x), y});
+
+        switch (c) {
+        case '#':
+            return false;
+        case '[':
+            newRow.at(x) = true;
+            newRow.at(x + 1) = true;
+            break; // Det här hade jag missat
+        case ']':
+            newRow.at(x) = true;
+            newRow.at(x - 1) = true;
+            break;
+        case '@':
+            newRow.at(x) = true;
+            break;
+        }
+    }
+
+    auto hasBits = false;
+
+    for (auto bit : newRow) {
+        if (bit) {
+            hasBits = true;
+            break;
+        }
+    }
+
+    // Nothing to check for and nathing to move
+    if (!hasBits) {
+        return true;
+    }
+
+    if (tryMoveVertical(map, y + dir.y, newRow, dir)) {
+        for (auto x : iota_view(1uz, cellsToCheck.size() - 1)) {
+            auto &cOld = map.at(Vec{static_cast<int>(x), y});
+
+            // if (cOld == '[' || cOld == ']') {
+            if (newRow.at(x)) {
+                auto &cNew = map.at(Vec{static_cast<int>(x), y + dir.y});
+                cNew = std::exchange(cOld, '.');
+            }
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
 int main(int argc, char *argv[]) {
+    auto isTest = argc > 1;
     auto file = std::ifstream{std::string{"data/15"} +
-                              (argc <= 1 ? ".txt" : "-test.txt")};
+                              (!isTest ? ".txt" : "-test.txt")};
 
     auto content = std::vector<std::string>{};
 
@@ -189,32 +276,101 @@ int main(int argc, char *argv[]) {
         moves += line;
     }
 
-    auto map = Canvas<char>{content};
+    {
+        auto map = Canvas<char>{content};
+        auto robotPos = extractRobotPosition(map);
 
-    auto robotPos = extractRobotPosition(map);
+        std::cout << std::format("Robot {},{}\n", robotPos.x, robotPos.y);
 
-    std::cout << std::format("Robot {},{}\n", robotPos.x, robotPos.y);
+        map.print();
 
-    map.print();
+        std::cout << moves << std::endl;
 
-    std::cout << moves << std::endl;
+        for (auto c : moves) {
+            tryMoveRobot(map, robotPos, charToCoord(c));
+            // std::cout << "Move: " << c << "\n";
+            // map.print();
+        }
 
-    for (auto c : moves) {
-        tryMoveRobot(map, robotPos, c);
-        // std::cout << "Move: " << c << "\n";
-        // map.print();
-    }
+        int sum1 = 0;
 
-    int sum1 = 0;
-
-    for (auto y : iota_view{0uz, map.width}) {
-        for (auto x : iota_view{0uz, map.width}) {
-            auto c = map.at(x, y);
-            if (c == 'O') {
-                sum1 += y * 100 + x;
+        for (auto y : iota_view{0uz, map.height}) {
+            for (auto x : iota_view{0uz, map.width}) {
+                auto c = map.at(x, y);
+                if (c == 'O') {
+                    sum1 += y * 100 + x;
+                }
             }
         }
+
+        std::cout << std::format("Part 1: {}\n", sum1);
     }
 
-    std::cout << std::format("Part 1: {}\n", sum1);
+    {
+        auto map = Canvas<char>{content};
+        auto largerMap = scaleUp(map);
+        auto robotPos = extractRobotPosition(largerMap);
+
+        largerMap.print();
+
+        /// Test
+        // for (std::string c; std::cin >> c;) {
+        //     auto dir = charToCoord(c.front());
+        //     if (dir.y == 0) {
+        //         tryMoveRobot(largerMap, robotPos, dir);
+        //     }
+        //     else {
+        //         auto cellsToCheck = std::vector(largerMap.width, false);
+        //         cellsToCheck.at(robotPos.x) = true;
+        //         if (tryMoveVertical(largerMap, robotPos.y, cellsToCheck,
+        //         dir)) {
+        //             robotPos = extractRobotPosition(largerMap);
+        //         }
+        //     }
+        //     std::cout << "Move: " << c << "\n";
+        //     largerMap.print();
+        // }
+        // end test
+
+        for (auto c : moves) {
+            auto dir = charToCoord(c);
+            if (dir.y == 0) {
+                tryMoveRobot(largerMap, robotPos, dir);
+            }
+            else {
+                auto cellsToCheck = std::vector(largerMap.width, false);
+                cellsToCheck.at(robotPos.x) = true;
+                if (tryMoveVertical(largerMap, robotPos.y, cellsToCheck, dir)) {
+                    robotPos = extractRobotPosition(largerMap);
+                }
+            }
+            if (isTest) {
+                std::cout << "Move: " << c << "\n";
+                largerMap.print();
+            }
+        }
+
+        int sum2 = 0;
+
+        for (auto y : iota_view{0uz, largerMap.height}) {
+            for (auto x : iota_view{0uz, largerMap.width}) {
+                auto c = largerMap.at(x, y);
+
+                if (c == '[') {
+                    auto left = x;
+                    auto right = largerMap.width - x - 2;
+                    auto top = y;
+                    auto bottom = largerMap.height - y - 1;
+
+                    auto minX = std::min(left, right);
+                    auto minY = std::min(top, bottom);
+                    sum2 += y * 100 + x;
+                }
+            }
+        }
+
+        largerMap.print();
+
+        std::cout << std::format("Part 1: {}\n", sum2);
+    }
 }
