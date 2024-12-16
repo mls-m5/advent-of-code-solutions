@@ -111,6 +111,9 @@ struct SearchPosition {
     Vec pos;
     Vec dir;
     int score = 0;
+    int grace = 2;
+
+    std::vector<Vec> visitedTiles;
 };
 
 Vec extractPosition(Canvas<char> &canvas, char f, char replacement = '.') {
@@ -129,34 +132,6 @@ Vec extractPosition(Canvas<char> &canvas, char f, char replacement = '.') {
     throw std::runtime_error{"could not find robot"};
 }
 
-Vec charToCoord(char c) {
-    switch (c) {
-    case '^':
-        return {0, -1};
-    case '>':
-        return {1, 0};
-    case 'v':
-        return {0, 1};
-    case '<':
-        return {-1, 0};
-    }
-    throw std::runtime_error{"invalid direction"};
-}
-
-// char nextChar(char c) {
-//     switch (c) {
-//     case '^':
-//         return '>';
-//     case '>':
-//         return 'v';
-//     case 'v':
-//         return '<';
-//     case '<':
-//         return '^';
-//     }
-//     return '?';
-// }
-
 Vec rotateLeft(Vec v) {
     return {v.y, -v.x};
 }
@@ -169,45 +144,80 @@ void step(Canvas<char> &map,
           Canvas<int> &searchMap,
           std::vector<SearchPosition> &positions,
           const Vec endPosition,
-          int &smallestEndScore) {
+          int &smallestEndScore,
+          std::vector<SearchPosition> &bestPaths) {
     auto newPositions = std::vector<SearchPosition>{};
 
-    auto explore =
-        [&endPosition, &newPositions, &map, &searchMap, &smallestEndScore](
-            Vec pos, Vec dir, int score) {
-            auto np = pos + dir;
-            auto &i = searchMap.at(np);
-            auto c = map.at(np);
-            if (score > i) {
+    auto explore = [&endPosition,
+                    &newPositions,
+                    &map,
+                    &searchMap,
+                    &smallestEndScore,
+                    &bestPaths](Vec pos,
+                                Vec dir,
+                                int score,
+                                std::vector<Vec> visitedTiles,
+                                int grace) {
+        auto np = pos + dir;
+        auto &i = searchMap.at(np);
+        auto c = map.at(np);
+        if (score > i) {
+            if (grace == 0) {
                 return;
             }
-            if (c == '#') {
-                return;
-            }
-            if (np == endPosition) {
-                smallestEndScore = std::min(smallestEndScore, score);
-                return;
-            }
-            i = score;
-            newPositions.push_back({
-                .pos = np,
-                .dir = dir,
-                .score = score,
-            });
+            grace -= 1;
+        }
+        else {
+            grace = 2;
+        }
+        if (c == '#') {
+            return;
+        }
+        visitedTiles.push_back(np);
+
+        auto newHead = SearchPosition{
+            .pos = np,
+            .dir = dir,
+            .score = score,
+            .grace = grace,
+            .visitedTiles = visitedTiles,
         };
+
+        if (np == endPosition) {
+            smallestEndScore = std::min(smallestEndScore, score);
+
+            bestPaths.push_back(newHead);
+
+            return;
+        }
+        if (score < i) {
+            i = score;
+        }
+        newPositions.push_back(newHead);
+    };
     for (auto &head : positions) {
         {
             // Straight
 
-            explore(head.pos, head.dir, head.score + 1);
-            explore(head.pos, rotateLeft(head.dir), head.score + 1 + 1000);
-            explore(head.pos, rotateRight(head.dir), head.score + 1 + 1000);
+            explore(head.pos,
+                    head.dir,
+                    head.score + 1,
+                    head.visitedTiles,
+                    head.grace);
+            explore(head.pos,
+                    rotateLeft(head.dir),
+                    head.score + 1 + 1000,
+                    head.visitedTiles,
+                    head.grace);
+            explore(head.pos,
+                    rotateRight(head.dir),
+                    head.score + 1 + 1000,
+                    head.visitedTiles,
+                    head.grace);
         }
     }
 
-    positions = newPositions;
-    // positions.insert(positions.end(), newPositions.begin(),
-    // newPositions.end());
+    positions = std::move(newPositions);
 }
 
 void drawSearchMap(const Canvas<char> &map,
@@ -242,13 +252,16 @@ int main(int argc, char *argv[]) {
     auto searchPositions = std::vector{SearchPosition{
         .pos = start,
         .dir = {1, 0},
+        .visitedTiles = {start},
     }};
 
     int smallestEndScore = std::numeric_limits<int>::max();
 
+    auto bestPaths = std::vector<SearchPosition>{};
+
     drawSearchMap(map, searchPositions);
     for (; !searchPositions.empty();) {
-        step(map, scoreMap, searchPositions, end, smallestEndScore);
+        step(map, scoreMap, searchPositions, end, smallestEndScore, bestPaths);
         if (isTest) {
             std::cout << std::format("current smallest: {}\n",
                                      smallestEndScore);
@@ -256,5 +269,28 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    auto it = std::remove_if(bestPaths.begin(),
+                             bestPaths.end(),
+                             [smallestEndScore](SearchPosition &p) {
+                                 return p.score > smallestEndScore;
+                             });
+
+    bestPaths.erase(it, bestPaths.end());
+
+    auto seatMap = Canvas<char>{map.width, map.height, ' '};
+    seatMap.data = map.data;
+
+    for (auto &p : bestPaths) {
+        for (auto &v : p.visitedTiles) {
+            seatMap.at(v) = 'O';
+        }
+    }
+
+    seatMap.print();
+
     std::cout << std::format("Part 1: {}\n", smallestEndScore);
+
+    auto sum2 = std::count(seatMap.data.begin(), seatMap.data.end(), 'O');
+
+    std::cout << std::format("Part 2: {}\n", sum2);
 }
