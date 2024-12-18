@@ -1,9 +1,15 @@
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <format>
 #include <fstream>
+#include <functional>
+#include <iomanip>
+#include <ios>
 #include <iostream>
 #include <istream>
+#include <map>
+#include <numeric>
 #include <ranges>
 #include <ratio>
 #include <sstream>
@@ -13,12 +19,22 @@
 #include <vector>
 
 using std::ranges::iota_view;
-using Int = long;
+using Int = __int128_t;
 struct Cpu;
 
 using OpFT = void (*)(Cpu &);
 
 using OpListT = std::array<OpFT, 8>;
+
+std::ostream &operator<<(std::ostream &stream, __int128 value) {
+    auto str = std::string{};
+    for (; value; value /= 10) {
+        str.push_back('0' + static_cast<char>(value % 10));
+    }
+
+    std::ranges::reverse(str);
+    return stream << str;
+}
 
 struct Cpu {
     Int a = 0;
@@ -31,8 +47,8 @@ struct Cpu {
     std::vector<char> outputValues;
     std::vector<int> usedOperations;
 
-    void clear() {
-        a = 0;
+    void clear(Int aValue) {
+        a = aValue;
         b = 0;
         c = 0;
         pc = 0;
@@ -273,6 +289,16 @@ Program: 0,3,5,4,3,0
     assert(cpu.program == cpu.outputValues);
 }
 
+auto &printBinary(Int i) {
+    auto ret = std::string{};
+    for (; i; i >>= 1) {
+        ret += ((i & 1) ? '1' : '0');
+    }
+    std::reverse(ret.begin(), ret.end());
+    std::cout << ret;
+    return std::cout;
+}
+
 int main(int argc, char *argv[]) {
     auto file = std::ifstream{std::string{"data/17"} +
                               (argc <= 1 ? ".txt" : "-test.txt")};
@@ -305,36 +331,87 @@ int main(int argc, char *argv[]) {
     }
 
     {
-        auto program = cpu.program;
-
         std::cout << "Trying to find the right value of the cpus register\n";
         auto testCpu = cpuCopy;
-        Int start = 40'000'000'000'000;
-        // Int start = 1000;
-        for (auto i : iota_view(start, start + 1000'000'000)) {
-            testCpu.clear();
-            testCpu.a = i;
 
-            testCpu.run(false, true);
-            if (testCpu.outputValues == testCpu.program) {
-                std::cout << std::format("found value: {}\n", i);
-                break;
+        std::cout << "---" << std::endl;
+
+        auto charMap = std::map<char, char>{};
+
+        for (auto in : iota_view{1uz, (1uz << 3)}) {
+            // auto i = in << 4;
+            auto i = in;
+            std::cout << "Ain: " << i << "\n";
+            testCpu.clear(i);
+            testCpu.run(false);
+            testCpu.printState();
+            testCpu.printProgram();
+
+            if (charMap.find(i) == charMap.end()) {
+                charMap[testCpu.outputValues.front()] = i;
             }
-            // if (i % 1'000'000 == 0) {
-            if (i % 1'00 == 0) {
-                testCpu.clear();
-                testCpu.a = i;
-                testCpu.run(false, true, true);
-                std::cout << i << std::endl;
-                testCpu.printState();
-                testCpu.printProgram();
-                testCpu.printUsedOperations();
-                std::cout.flush();
-                using namespace std::chrono_literals;
-                std::this_thread::sleep_for(400ms);
+
+            std::cout << std::endl;
+        }
+
+        std::cout << std::flush;
+        Int result2 = {};
+
+        auto prog = cpu.program;
+
+        for (auto in : iota_view{0uz, 1024uz * 2}) {
+
+            auto i = (in << 4) + 2;
+            testCpu.clear(i);
+            testCpu.run(false);
+            // testCpu.printState();
+            // testCpu.printProgram();
+            std::cout << "i: " << std::setw(16);
+            printBinary(i) << ": " << testCpu.resultString() << std::endl;
+        }
+
+        return 0;
+
+        for (auto index : iota_view{0uz, prog.size()}) {
+            // result2 <<= 4;
+            for (auto in : iota_view{1uz, 8uz}) {
+                // auto current = (in << 4 * (index + 1));
+                // auto current = in;
+                auto i = (in << 4 * index) + result2;
+                testCpu.clear(i);
+                testCpu.run(false);
+                std::cout << "Ain: " << std::setw(20) << i << ": "
+                          << "\t";
+                std::cout << "R: " << testCpu.resultString() << "\n";
+                std::cout << std::endl;
+
+                if (testCpu.outputValues.at(index) ==
+                    testCpu.program.at(index)) {
+                    result2 = i;
+                    break;
+                }
+                // testCpu.printState();
+                // testCpu.printProgram();
             }
         }
+
+        // for (int i = cpu.program.size() - 1; i >= 0; --i) {
+        //     auto c = cpu.program.at(i);
+        //     result2 <<= 3;
+        //     result2 += charMap.at(c);
+        // }
+        // std::cout << "final cpu state:\n";
+
+        // testCpu.clear(result2);
+        // testCpu.run(false);
+        // testCpu.printState();
+        // testCpu.printProgram();
+
+        // std::cout << std::format("Part 2: {}\n", result2);
+
+        // std::cout.flush();
     }
 
     // 367057314  is not right
+    // 14892071842402 is to low
 }
