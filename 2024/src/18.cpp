@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <format>
 #include <fstream>
 #include <functional>
@@ -6,9 +7,7 @@
 #include <limits>
 #include <list>
 #include <memory>
-#include <optional>
 #include <ranges>
-#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -198,7 +197,6 @@ int breadthFirst(Canvas<char> &map,
             break;
         }
         auto head = searchHeads.front();
-        // searchHeads.pop_back();
         searchHeads.pop_front();
         if (auto f = explore(head, {0, -1})) {
             return count(head);
@@ -212,11 +210,9 @@ int breadthFirst(Canvas<char> &map,
         if (auto f = explore(head, {1, 0})) {
             return count(head);
         }
-
-        // map.print();
     }
 
-    throw std::runtime_error{"Could not find path"};
+    return -1;
 }
 
 int main(int argc, char *argv[]) {
@@ -233,12 +229,9 @@ int main(int argc, char *argv[]) {
     std::cout << "size: " << size << std::endl;
 
     auto map = Canvas<char>{size, size, '.'};
-    auto originalMap = map;
 
     for (std::string line; file >> line;) {
         dropped.push_back(coordFromLine(line));
-        // std::cout << line << "\n";
-        // std::cout << dropped.back().x << "," << dropped.back().y << "\n";
     }
 
     auto start = Vec{0, 0};
@@ -248,6 +241,8 @@ int main(int argc, char *argv[]) {
         map.at(dropped.at(i)) = '#';
     }
 
+    auto originalMap = map;
+
     map.print();
 
     auto distanceMap = Canvas<int>{size, size, std::numeric_limits<Int>::max()};
@@ -255,10 +250,29 @@ int main(int argc, char *argv[]) {
     auto count = breadthFirst(map, distanceMap, start, end);
     map.print();
 
-    // 158 is to low
     std::cout << std::format("Part 1: {}\n", count);
 
     std::cout << std::count(map.data.begin(), map.data.end(), 'O') << std::endl;
 
     std::cout << std::endl;
+
+    for (auto i : iota_view{1024uz, dropped.size()}) {
+        auto d = dropped.at(i);
+        originalMap.at(d) = '#';
+        if (map.at(d) == 'O') {
+            std::cout << "Needs updating" << std::endl;
+            std::fill(distanceMap.data.begin(),
+                      distanceMap.data.end(),
+                      std::numeric_limits<Int>::max());
+            map = originalMap;
+            if (-1 == breadthFirst(map, distanceMap, start, end)) {
+                std::cout << "stopped at " << i << std::endl;
+                std::cout << d.x << "," << d.y << std::endl;
+                break;
+            }
+            map.print();
+        }
+    }
+
+    map.print();
 }
