@@ -11,6 +11,9 @@ endfunction()
 
 file(COPY data DESTINATION .)
 
+file(GLOB SCRIPTS src/*.sh)
+file(COPY ${SCRIPTS} DESTINATION .)
+
 day(01)
 day(02)
 day(03)
